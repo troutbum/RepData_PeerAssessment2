@@ -33,7 +33,7 @@ Download *Storm Data* and unzip if it isn't already there:
 library(R.utils)       #for bzunzip
 fileDir <- "./data/"
 fileZipName <- "repdata-data-StormData.csv.bz2"
-fileName <- "# raw <- read.csv(paste0(fileDir, fileName),colClasses = c("integer", "character", "integer"))"
+fileName <- "repdata-data-StormData.csv"
 fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
 
 filePath <- paste0(fileDir, fileZipName)
@@ -43,7 +43,7 @@ if (!file.exists(filePath)) {
         dateDownloaded <- date()
 }
 ```
-Download documentation files:  **National Weather Service Storm Data Documentation** and *National Climatic Data Center Storm Events FAQ*
+Download documentation files:  *National Weather Service Storm Data Documentation* and *National Climatic Data Center Storm Events FAQ*
 ```{r download documentation}
 fileName2 <- "repdata-peer2_doc-pd01016005curr.pdf"
 fileUrl2 <- "https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf"
