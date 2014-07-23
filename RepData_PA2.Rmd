@@ -65,7 +65,7 @@ if (!file.exists(filePath3)) {
 ### Read in data file, subset and clean
 ``` {r read dataset, echo = TRUE}
 raw <- read.csv(paste0(fileDir, fileName))
-data <- subset(raw, na.omit=TRUE, select=c(EVTYPE, FATALITIES, INJURIES, PROPDMG,PROPDMGEXP))
+data <- subset(raw, na.omit=TRUE, select=c(EVTYPE, FATALITIES, INJURIES, PROPDMG, PROPDMGEXP))
 ```
 
 ### 
@@ -76,7 +76,7 @@ injured_by_event <- sort(injured_by_event, decreasing = TRUE)
 top_injury_events <- head(injured_by_event, n=20L)
 
 top_injury_events <- sort(top_injury_events, decreasing = FALSE)                # reverse sort order
-barchart(top_injury_events)
+barchart(top_injury_events, xlab='Injuries', main='Total Injuries by Weather Event')
 
 
 deaths_by_event <- tapply(data$FATALITIES, data$EVTYPE, sum, simplify = TRUE)   # simply returns a scalar not list
@@ -84,7 +84,7 @@ deaths_by_event <- sort(deaths_by_event, decreasing = TRUE)
 top_death_events <- head(deaths_by_event, n=20L)
 
 top_death_events <- sort(top_death_events, decreasing = FALSE)                  # reverse sort order
-barchart(top_death_events, col="red")
+barchart(top_death_events, col="red", xlab='Deaths', main='Total Deaths by Weather Event')
 
 ```
 
