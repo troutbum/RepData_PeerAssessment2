@@ -19,17 +19,17 @@ to address the following questions:
 ### Download storm data, documentation and FAQ
 
 Set working directory:
-``` {r setwd }
+``` {r setwd, echo = TRUE}
 setwd("~/GitHub/RepData_PeerAssessment2")
 ```
 Create a data subdirectory if it does not exist:
-``` {r subdirectory} 
+``` {r subdirectory, echo = TRUE} 
 if (!file.exists("data")) {
         dir.create("data")
 }
 ```
 Download *Storm Data* and unzip if it isn't already there:
-``` {r download dataset}
+``` {r download dataset, echo = TRUE}
 library(R.utils)       #for bzunzip
 fileDir <- "./data/"
 fileZipName <- "repdata-data-StormData.csv.bz2"
@@ -39,12 +39,12 @@ fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv
 filePath <- paste0(fileDir, fileZipName)
 if (!file.exists(filePath)) {
         download.file(fileUrl, destfile = filePath, method ="curl")
-        bunzip2(filePath, exdir=fileDir)
+        bunzip2(filePath, exdir=fileDir, remove=FALSE)
         dateDownloaded <- date()
 }
 ```
 Download documentation files:  *National Weather Service Storm Data Documentation* and *National Climatic Data Center Storm Events FAQ*
-```{r download documentation}
+```{r download documentation, echo = TRUE}
 fileName2 <- "repdata-peer2_doc-pd01016005curr.pdf"
 fileUrl2 <- "https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf"
 filePath2 <- paste0(fileDir, fileName2) 
@@ -62,28 +62,52 @@ if (!file.exists(filePath3)) {
 }
 ```
 
-### Read in data file
-2. Process/transform the data into a format suitable for analysis
-``` {r }
+### Read in data file, subset and clean
+``` {r read dataset, echo = TRUE}
 raw <- read.csv(paste0(fileDir, fileName))
-# raw <- read.csv(paste0(fileDir, fileName),colClasses = c("integer", "character", "integer"))
-#clean <- na.omit(raw)
-#clean$date <- as.factor(clean$date)
-#clean$interval <- as.factor(clean$interval)
+data <- subset(raw, na.omit=TRUE, select=c(EVTYPE, FATALITIES, INJURIES, PROPDMG,PROPDMGEXP))
 ```
 
 ## Results
-You may have other sections in your analysis, but Data Processing and Results are required.
 
 The analysis document must have at least one figure containing a plot.
 
 Your analyis must have no more than three figures. Figures may have multiple plots in them (i.e. panel plots), but there cannot be more than three figures total.
 
-You must show all your code for the work in your analysis document. This may make the document a bit verbose, but that is okay. In general, you should ensure that echo = TRUE for every code chunk (this is the default setting in knitr).
+```{r results, echo = TRUE}
+
+injured <- with(data, tapply(INJURIES, EVTYPE, sum))
+injured <- sort(injured, decreasing = TRUE)
+top20_injured <- head(injured, n=20L)
+most_injuries <- as.data.frame(top20_injured)
+colnames(most_injuries) <- c("injuries")
+
+dead <- with(data, tapply(FATALITIES, EVTYPE, sum))
+dead <- sort(dead, decreasing = TRUE)
+top20_dead <- head(dead, n=20L)
+
+barplot(top20_injured, main="Car Distribution", horiz=TRUE)
+        
+library(ggplot2)
+ploti <- ggplot(most_injuries, aes(row.names)) +
+        geom_bar() + coord_flip()
 
 
-```{r }
+        geom_bar(stat="identity") + 
+        facet_grid(. ~ year) +
+        scale_x_discrete(breaks=NULL) +                              # suppress x-axis label
+        labs(x="---total emission levels indicated by dashed lines---") +
+        theme(axis.title.x = element_text(colour = "#990000"),
+              axis.title.y = element_text(colour = "black")) +
+        labs(y="PM2.5 Emissions (in tons)") +
+        labs(title="Baltimore City, Maryland | Motor Vehicle PM2.5 Emissions") + 
+        labs(fill = "Vehicle Type")
+
+
+ <- by(data, factorw,                              # per factor, calc mean steps per interval
+                function(x) {                           
+                        tapply(x$steps, x$interval, mean)
+                }
 
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
