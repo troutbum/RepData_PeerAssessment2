@@ -68,6 +68,28 @@ raw <- read.csv(paste0(fileDir, fileName))
 data <- subset(raw, na.omit=TRUE, select=c(EVTYPE, FATALITIES, INJURIES, PROPDMG,PROPDMGEXP))
 ```
 
+### 
+```{r}
+library(lattice)
+injured_by_event <- tapply(data$INJURIES, data$EVTYPE, sum, simplify = TRUE)    # simply returns a scalar not list
+injured_by_event <- sort(injured_by_event, decreasing = TRUE)
+top_injury_events <- head(injured_by_event, n=20L)
+
+top_injury_events <- sort(top_injury_events, decreasing = FALSE)                # reverse sort order
+barchart(top_injury_events)
+
+
+deaths_by_event <- tapply(data$FATALITIES, data$EVTYPE, sum, simplify = TRUE)   # simply returns a scalar not list
+deaths_by_event <- sort(deaths_by_event, decreasing = TRUE)
+top_death_events <- head(deaths_by_event, n=20L)
+
+top_death_events <- sort(top_death_events, decreasing = FALSE)                  # reverse sort order
+barchart(top_death_events, col="red")
+
+```
+
+
+
 ## Results
 
 The analysis document must have at least one figure containing a plot.
@@ -76,38 +98,6 @@ Your analyis must have no more than three figures. Figures may have multiple plo
 
 ```{r results, echo = TRUE}
 
-injured <- with(data, tapply(INJURIES, EVTYPE, sum))
-injured <- sort(injured, decreasing = TRUE)
-top20_injured <- head(injured, n=20L)
-most_injuries <- as.data.frame(top20_injured)
-colnames(most_injuries) <- c("injuries")
-
-dead <- with(data, tapply(FATALITIES, EVTYPE, sum))
-dead <- sort(dead, decreasing = TRUE)
-top20_dead <- head(dead, n=20L)
-
-barplot(top20_injured, main="Car Distribution", horiz=TRUE)
-        
-library(ggplot2)
-ploti <- ggplot(most_injuries, aes(row.names)) +
-        geom_bar() + coord_flip()
-
-
-        geom_bar(stat="identity") + 
-        facet_grid(. ~ year) +
-        scale_x_discrete(breaks=NULL) +                              # suppress x-axis label
-        labs(x="---total emission levels indicated by dashed lines---") +
-        theme(axis.title.x = element_text(colour = "#990000"),
-              axis.title.y = element_text(colour = "black")) +
-        labs(y="PM2.5 Emissions (in tons)") +
-        labs(title="Baltimore City, Maryland | Motor Vehicle PM2.5 Emissions") + 
-        labs(fill = "Vehicle Type")
-
-
- <- by(data, factorw,                              # per factor, calc mean steps per interval
-                function(x) {                           
-                        tapply(x$steps, x$interval, mean)
-                }
 
 ```
 
