@@ -136,6 +136,8 @@ library(lattice)
 barchart(top_injury_events, xlab='Injuries', main='Total Injuries by Weather Event')
 barchart(top_death_events, col="red", xlab='Deaths', main='Total Deaths by Weather Event')
 barchart(top_cost_events, col="green", xlab='Cost in dollars', main='Total Property Damage by Weather Event')
+
+library(xtable)
 print(xtable(head(combo2), type="html"))
 ```
 
