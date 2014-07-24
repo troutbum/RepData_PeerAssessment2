@@ -94,23 +94,36 @@ data <- cbind(data,cost)
 ```
 
 ### Determine total injuries, deaths and property damage costs by weather event type
-```{r}
+```{r }
+toplevels <- 25
 injured_by_event <- tapply(data$INJURIES, data$EVTYPE, 
                            sum, simplify = TRUE)                # simply returns a scalar not list
 injured_by_event <- sort(injured_by_event, decreasing = TRUE)
-top_injury_events <- head(injured_by_event, n=20L)
+top_injury_events <- head(injured_by_event, n=toplevels)
 top_injury_events <- sort(top_injury_events, decreasing = FALSE)        # reverse sort order
 
 deaths_by_event <- tapply(data$FATALITIES, data$EVTYPE, sum, simplify = TRUE)
 deaths_by_event <- sort(deaths_by_event, decreasing = TRUE)
-top_death_events <- head(deaths_by_event, n=20L)
+top_death_events <- head(deaths_by_event, n=toplevels)
 top_death_events <- sort(top_death_events, decreasing = FALSE)                  
 
 cost_by_event <- tapply(data$cost, data$EVTYPE, sum, simplify = TRUE)
 cost_by_event <- sort(cost_by_event, decreasing = TRUE)
-top_cost_events <- head(cost_by_event, n=20L)
+top_cost_events <- head(cost_by_event, n=toplevels)
 top_cost_events <- sort(top_cost_events, decreasing = FALSE)                  
 ```
+
+```{r }
+combo <- cbind(deaths_by_event, injured_by_event, as.integer(cost_by_event/10^6))
+combo2 <- combo[order(-deaths_by_event),]
+combo3 <- combo[order(-cost_by_event),]
+print(head(combo2, n=25))
+
+agg <- aggregate(INJURIES ~ EVTYPE, data=data, FUN=sum)
+sagg <- agg[order(-agg$INJURIES),]
+barplot(sagg$INJURIES[1:25], xlab='Injuries', main='Total Injuries by Weather Event', horiz=TRUE)
+```
+
 
 ## Results
 
@@ -123,5 +136,6 @@ library(lattice)
 barchart(top_injury_events, xlab='Injuries', main='Total Injuries by Weather Event')
 barchart(top_death_events, col="red", xlab='Deaths', main='Total Deaths by Weather Event')
 barchart(top_cost_events, col="green", xlab='Cost in dollars', main='Total Property Damage by Weather Event')
+print(xtable(head(combo2), type="html"))
 ```
 
