@@ -1,9 +1,10 @@
 ---
 title: "Storm Data Analysis - Peer Assessment 2"
 author: ""
-date: "July 20, 2014"
+date: "July 25, 2014"
 output: html_document
 ---
+
 
 ## Synopsis
 
@@ -14,6 +15,7 @@ This data analysis uses the U.S. National Oceanic and Atmospheric Administration
 2. Across the United States, which types of events have the greatest economic consequences?
 
 The purpose of this analysis is to review historical severe weather events in order to prioritize resources for future contingencies.
+
 
 
 ## Data Processing
@@ -95,9 +97,9 @@ for (i in 1:nrow(data)) {
 }
 data <- cbind(data,cost)
 ```
-Determine total injuries, deaths and property damage costs by weather event type
+Determine total injuries, deaths and property damage costs by weather event type:
 ```{r analyze, echo = TRUE}
-toplevels <- 25
+toplevels <- 20
 unsorted_injured_by_event <- tapply(data$INJURIES, data$EVTYPE, 
                            sum, simplify = TRUE)                # simply returns a scalar not list
 injured_by_event <- sort(unsorted_injured_by_event, decreasing = TRUE)
@@ -114,27 +116,33 @@ cost_by_event <- sort(unsorted_cost_by_event, decreasing = TRUE)
 top_cost_events <- head(cost_by_event, n=toplevels)
 top_cost_events <- sort(top_cost_events, decreasing = FALSE)                  
 ```
-Tabulate the results for deaths, injuries and damage costs.
+Tabulate the results for deaths, injuries and damage costs:
 ```{r }
 combo <- cbind(unsorted_deaths_by_event, unsorted_injured_by_event, 
                as.integer(unsorted_cost_by_event/10^6))
 results <- combo[order(-unsorted_deaths_by_event),]
-colnames(results) <- c("Deaths","Injuries","Costs($M)")
+colnames(results) <- c("Deaths","Injuries","Damage($M)")
 print(head(results, n=toplevels))
 ```
 
 
 ## Results
 
-Your analyis must have no more than three figures. Figures may have multiple plots in them (i.e. panel plots), but there cannot be more than three figures total.
-
-```{r plots, echo = TRUE}
+With respect to analyzing the question *which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?*, the plots in Figures 1 & 2 are illustrative.
+```{r figure1, echo = TRUE}
 library(lattice)
-library(gridExtra)
-barchart(top_injury_events, xlab='Injuries', main='Total Injuries by Weather Event')
-barchart(top_death_events, col="red", xlab='Deaths', main='Total Deaths by Weather Event')
-barchart(top_cost_events, col="green", xlab='Cost in dollars', 
-         main='Total Property Damage by Weather Event')
+barchart(top_death_events, col="red", xlab='Deaths', main='Figure 1 Total Deaths by Weather Event')
+```
 
+```{r figure2, echo = TRUE}
+barchart(top_injury_events, xlab='Injuries', main='Figure 2 Total Injuries by Weather Event')
+```
+
+
+In terms of studying the question *which types of events have the greatest economic consequences?*
+the following plot is informative.
+```{r figure3, echo=TRUE}
+barchart(top_cost_events, col="green", xlab='Cost ($US)', 
+         main='Figure 3 Total Property Damage by Weather Event')
 ```
 
