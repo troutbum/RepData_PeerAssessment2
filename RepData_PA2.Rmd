@@ -4,15 +4,17 @@ author: ""
 date: "July 20, 2014"
 output: html_document
 ---
-## Synopsis
- >>>describes and summarizes your analysis in at most 10 complete sentences.
 
-This data analysis uses the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. 
-to address the following questions:
+## Synopsis
+
+This data analysis uses the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database to address the following questions:
 
 1.  Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
 
 2. Across the United States, which types of events have the greatest economic consequences?
+
+The purpose of this analysis is to review historical severe weather events in order to prioritize resources for future contingencies.
+
 
 ## Data Processing
 
@@ -30,7 +32,7 @@ if (!file.exists("data")) {
 ```
 Download *Storm Data* and unzip if it isn't already there:
 ``` {r download dataset, echo = TRUE}
-library(R.utils)       #for bzunzip
+library(R.utils, quietly = TRUE)                        #for bzunzip
 fileDir <- "./data/"
 fileZipName <- "repdata-data-StormData.csv.bz2"
 fileName <- "repdata-data-StormData.csv"
@@ -68,7 +70,9 @@ raw <- read.csv(paste0(fileDir, fileName))
 data <- subset(raw, na.omit=TRUE, select=c(EVTYPE, FATALITIES, INJURIES, PROPDMG, PROPDMGEXP))
 ```
 
-### Compute property damage cost by multiplying exponent *PROPDMGEXP*
+### Run analysis
+
+Compute property damage cost by multiplying damage variable *PROPDMG* by the exponent variable *PROPDMGEXP*
 ``` {r exponents, echo = TRUE}
 cost <- rep(NA, nrow(data))                                                     # damage cost
 for (i in 1:nrow(data)) {                               
@@ -90,54 +94,47 @@ for (i in 1:nrow(data)) {
         }
 }
 data <- cbind(data,cost)
-
 ```
-
-### Determine total injuries, deaths and property damage costs by weather event type
-```{r }
+Determine total injuries, deaths and property damage costs by weather event type
+```{r analyze, echo = TRUE}
 toplevels <- 25
-injured_by_event <- tapply(data$INJURIES, data$EVTYPE, 
+unsorted_injured_by_event <- tapply(data$INJURIES, data$EVTYPE, 
                            sum, simplify = TRUE)                # simply returns a scalar not list
-injured_by_event <- sort(injured_by_event, decreasing = TRUE)
+injured_by_event <- sort(unsorted_injured_by_event, decreasing = TRUE)
 top_injury_events <- head(injured_by_event, n=toplevels)
 top_injury_events <- sort(top_injury_events, decreasing = FALSE)        # reverse sort order
 
-deaths_by_event <- tapply(data$FATALITIES, data$EVTYPE, sum, simplify = TRUE)
-deaths_by_event <- sort(deaths_by_event, decreasing = TRUE)
+unsorted_deaths_by_event <- tapply(data$FATALITIES, data$EVTYPE, sum, simplify = TRUE)
+deaths_by_event <- sort(unsorted_deaths_by_event, decreasing = TRUE)
 top_death_events <- head(deaths_by_event, n=toplevels)
 top_death_events <- sort(top_death_events, decreasing = FALSE)                  
 
-cost_by_event <- tapply(data$cost, data$EVTYPE, sum, simplify = TRUE)
-cost_by_event <- sort(cost_by_event, decreasing = TRUE)
+unsorted_cost_by_event <- tapply(data$cost, data$EVTYPE, sum, simplify = TRUE)
+cost_by_event <- sort(unsorted_cost_by_event, decreasing = TRUE)
 top_cost_events <- head(cost_by_event, n=toplevels)
 top_cost_events <- sort(top_cost_events, decreasing = FALSE)                  
 ```
-
+Tabulate the results for deaths, injuries and damage costs.
 ```{r }
-combo <- cbind(deaths_by_event, injured_by_event, as.integer(cost_by_event/10^6))
-combo2 <- combo[order(-deaths_by_event),]
-combo3 <- combo[order(-cost_by_event),]
-print(head(combo2, n=25))
-
-agg <- aggregate(INJURIES ~ EVTYPE, data=data, FUN=sum)
-sagg <- agg[order(-agg$INJURIES),]
-barplot(sagg$INJURIES[1:25], xlab='Injuries', main='Total Injuries by Weather Event', horiz=TRUE)
+combo <- cbind(unsorted_deaths_by_event, unsorted_injured_by_event, 
+               as.integer(unsorted_cost_by_event/10^6))
+results <- combo[order(-unsorted_deaths_by_event),]
+colnames(results) <- c("Deaths","Injuries","Costs($M)")
+print(head(results, n=toplevels))
 ```
 
 
 ## Results
 
-The analysis document must have at least one figure containing a plot.
-
 Your analyis must have no more than three figures. Figures may have multiple plots in them (i.e. panel plots), but there cannot be more than three figures total.
 
-```{r results, echo = TRUE}
+```{r plots, echo = TRUE}
 library(lattice)
+library(gridExtra)
 barchart(top_injury_events, xlab='Injuries', main='Total Injuries by Weather Event')
 barchart(top_death_events, col="red", xlab='Deaths', main='Total Deaths by Weather Event')
-barchart(top_cost_events, col="green", xlab='Cost in dollars', main='Total Property Damage by Weather Event')
+barchart(top_cost_events, col="green", xlab='Cost in dollars', 
+         main='Total Property Damage by Weather Event')
 
-library(xtable)
-print(xtable(head(combo2), type="html"))
 ```
 
